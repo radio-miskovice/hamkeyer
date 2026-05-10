@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hamkeyer Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .top-layout {
+            display: flex;
+            gap: 20px;
+            flex-flow: row;
+            align-items: flex-start;
+        }
+
+        .controls-column {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .status-panel {
+            flex: 0 0 auto;
+            width: min(50%, 340px);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .input-group input {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #0052a3;
+        }
+
+        button:active:not(:disabled) {
+            background: #003d7a;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        button.secondary {
+            background: #666;
+        }
+
+        button.secondary:hover:not(:disabled) {
+            background: #555;
+        }
+
+        .input-group button {
+            flex-shrink: 0;
+        }
+
+        #output {
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+            font-size: 13px;
+            background: #f9f9f9;
+            color: #333;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        #echoAscii {
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            padding: 10px 12px;
+            font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+            font-size: 14px;
+            background: #fdfcf5;
+            color: #5b4a00;
+            min-height: 42px;
+            max-height: 88px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .cw {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .cw-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .cw-echo-row {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .cw-column {
+            flex: 1 1 52%;
+            max-width: 52%;
+            min-width: 0;
+            flex-flow: row;
+        }
+
+        .echo-column {
+            flex: 1 1 44%;
+            max-width: 44%;
+            margin-left: auto;
+            min-width: 0;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .status-table th,
+        .status-table td {
+            border-bottom: 1px solid #ececec;
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        .status-table td {
+            vertical-align: middle;
+        }
+
+        .status-table th {
+            background: #fafafa;
+            color: #666;
+            width: 120px;
+            font-weight: 600;
+        }
+
+        .status-table tr:last-child th,
+        .status-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-table input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #0f7c32;
+        }
+
+        @media (max-width: 900px) {
+            .top-layout {
+                flex-direction: column;
+            }
+
+            .status-panel {
+                width: 100%;
+            }
+
+            .cw-echo-row {
+                flex-direction: column;
+            }
+        }
+
+        .error {
+            color: #d32f2f;
+        }
+
+        .success {
+            color: #388e3c;
+        }
+
+        .info {
+            color: #1976d2;
+        }
+
+        .status-bar {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .status-indicator.connected {
+            background: #388e3c;
+        }
+
+        .status-indicator.disconnected {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔌 Hamkeyer Demo</h1>
+        <p class="subtitle">Web Serial Keyer Interface — Click buttons to launch tests</p>
+
+        <div class="top-layout">
+
+            <div class="controls-column">
+                <div class="section">
+                    <div class="section-title">Connection</div>
+                    <div class="button-group">
+                        <button id="connectBtn">Connect Serial Port</button>
+                        <button id="disconnectBtn" disabled>Disconnect</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Initialization & Control</div>
+                    <div class="button-group">
+                        <button id="initBtn" disabled>Initialize</button>
+                        <button id="breakBtn" disabled>Break</button>
+                        <button id="statusBtn" disabled>Request Status</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Speed (WPM)</div>
+                    <div class="input-group">
+                        <input id="wpmInput" type="number" min="5" max="99" value="20" placeholder="Enter WPM (5-99)"
+                            disabled />
+                        <button id="setWpmBtn" disabled>Set WPM</button>
+                    </div>
+                    <button id="speedTestBtn" disabled>Speed Test</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Raw Command</div>
+                    <div class="input-group">
+                        <input id="rawCommandInput" type="text" placeholder="Enter hex bytes (e.g., 00 02 0A)" disabled />
+                        <button id="sendRawBtn" disabled>Send Raw</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section status-panel">
+                <div class="section-title">Status</div>
+                <table class="status-table" aria-label="Keyer Status">
+                    <tr>
+                        <th>isOpen</th>
+                        <td><input id="statusIsOpen" type="checkbox" disabled /></td>
+                    </tr>
+                    <tr>
+                        <th>version</th>
+                        <td id="statusVersion">--</td>
+                    </tr>
+                    <tr>
+                        <th>emit</th>
+                        <td><input id="statusEmit" type="checkbox" disabled /></td>
+                    </tr>
+                    <tr>
+                        <th>full</th>
+                        <td><input id="statusFull" type="checkbox" disabled /></td>
+                    </tr>
+                    <tr>
+                        <th>wpm</th>
+                        <td id="statusWpm">--</td>
+                    </tr>
+                    <tr>
+                        <th>busy</th>
+                        <td><input id="statusBusy" type="checkbox" disabled /></td>
+                    </tr>
+                    <tr>
+                        <th>break</th>
+                        <td><input id="statusBreak" type="checkbox" disabled /></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="cw">
+            <div class="cw-item">
+                <label id="cwTestBtn">CW TEST</label> 
+                <input id="cwInput" type="text"
+                    placeholder="Enter text to send (ASCII letters/numbers)" disabled />
+            </div>
+
+            <div class="cw-item">
+                <div class="section-title">Echo ASCII</div>
+                <div id="echoAscii">(no echoed ASCII yet)</div>
+            </div>
+        </div>
+
+
+        <div class="section">
+            <div class="section-title">Output</div>
+            <div id="output">Ready. Connect a serial port to begin.</div>
+        </div>
+
+        <div class="status-bar">
+            <span class="status-indicator disconnected" id="statusIndicator"></span>
+            <span id="statusText">Disconnected</span>
+        </div>
+    </div>
+
+
+    <script src="./build/bundle.js"></script>
+    <script>
+        let keyer = null;
+        const output = document.getElementById("output");
+        const echoAsciiEl = document.getElementById("echoAscii");
+        const statusText = document.getElementById("statusText");
+        const statusIndicator = document.getElementById("statusIndicator");
+        const statusCells = {
+            isOpen: document.getElementById("statusIsOpen"),
+            version: document.getElementById("statusVersion"),
+            emit: document.getElementById("statusEmit"),
+            full: document.getElementById("statusFull"),
+            wpm: document.getElementById("statusWpm"),
+            busy: document.getElementById("statusBusy"),
+            break: document.getElementById("statusBreak")
+        };
+        let echoPollTimer = null;
+        let statusListener = null;
+
+        const connectBtn = document.getElementById("connectBtn");
+        const disconnectBtn = document.getElementById("disconnectBtn");
+        const initBtn = document.getElementById("initBtn");
+        const breakBtn = document.getElementById("breakBtn");
+        const statusBtn = document.getElementById("statusBtn");
+        const setWpmBtn = document.getElementById("setWpmBtn");
+        const wpmInput = document.getElementById("wpmInput");
+        const speedTestBtn = document.getElementById("speedTestBtn");
+        const rawCommandInput = document.getElementById("rawCommandInput");
+        const sendRawBtn = document.getElementById("sendRawBtn");
+        const sendCwBtn = document.getElementById("sendCwBtn");
+        const cwInput = document.getElementById("cwInput");
+
+        function log(message, type = "info") {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = `[${timestamp}]`;
+            let className = "";
+
+            if (type === "error") {
+                className = "error";
+            } else if (type === "success") {
+                className = "success";
+            } else if (type === "info") {
+                className = "info";
+            }
+
+            const line = `<span class="${className}">${prefix} ${message}</span>`;
+            output.innerHTML += line + "\n";
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateUI(connected) {
+            connectBtn.disabled = connected;
+            disconnectBtn.disabled = !connected;
+            initBtn.disabled = !connected;
+            breakBtn.disabled = !connected;
+            statusBtn.disabled = !connected;
+            setWpmBtn.disabled = !connected;
+            wpmInput.disabled = !connected;
+            speedTestBtn.disabled = !connected;
+            rawCommandInput.disabled = !connected;
+            sendRawBtn.disabled = !connected;
+            // sendCwBtn.disabled = !connected;
+            cwInput.disabled = !connected;
+            document.getElementById("cwTestBtn").disabled = !connected;
+
+            if (connected) {
+                statusIndicator.className = "status-indicator connected";
+                statusText.textContent = "Connected";
+            } else {
+                statusIndicator.className = "status-indicator disconnected";
+                statusText.textContent = "Disconnected";
+            }
+        }
+
+        function refreshEchoAscii() {
+            if (!keyer || typeof keyer.getEchoAscii !== "function") {
+                echoAsciiEl.textContent = "(no echoed ASCII yet)";
+                return;
+            }
+
+            const text = keyer.getEchoAscii();
+            echoAsciiEl.textContent = text && text.length > 0
+                ? text
+                : "(no echoed ASCII yet)";
+        }
+
+        function statusTextValue(value) {
+            if (value === undefined || value === null) {
+                return "--";
+            }
+
+            return String(value);
+        }
+
+        function renderStatusTable(status) {
+            statusCells.isOpen.checked = Boolean(status.isOpen);
+            statusCells.emit.checked = Boolean(status.emit);
+            statusCells.full.checked = Boolean(status.full);
+            statusCells.busy.checked = Boolean(status.busy);
+            statusCells.break.checked = Boolean(status.break);
+
+            statusCells.version.textContent = statusTextValue(status.version);
+            statusCells.wpm.textContent = statusTextValue(status.wpm);
+        }
+
+        function startEchoPolling() {
+            if (echoPollTimer !== null) {
+                clearInterval(echoPollTimer);
+            }
+
+            echoPollTimer = setInterval(() => {
+                refreshEchoAscii();
+            }, 120);
+        }
+
+        function stopEchoPolling() {
+            if (echoPollTimer !== null) {
+                clearInterval(echoPollTimer);
+                echoPollTimer = null;
+            }
+        }
+
+        async function connectSerial() {
+            try {
+                log("Connecting to serial port...");
+
+                const api = window.Hamkeyer;
+                if (!api) {
+                    throw new Error("Bundle not loaded. Run npm run build.");
+                }
+
+                if (!window.isSecureContext) {
+                    throw new Error("Web Serial requires https or localhost");
+                }
+
+                if (!api.isWebSerialSupported) {
+                    throw new Error("Web Serial not supported by this browser");
+                }
+
+                keyer = await api.Keyer.create("winkeyer");
+                await keyer.connect("", 1200);
+
+                statusListener = (status) => {
+                    renderStatusTable(status);
+                };
+                keyer.on("status", statusListener);
+                renderStatusTable(keyer.getStatus());
+
+                startEchoPolling();
+                refreshEchoAscii();
+
+                log("Connected successfully", "success");
+                updateUI(true);
+            } catch (error) {
+                log(`Connect failed: ${error.message}`, "error");
+                keyer = null;
+                updateUI(false);
+            }
+        }
+
+        async function disconnectSerial() {
+            try {
+                if (keyer) {
+                    log("Disconnecting...");
+
+                    if (statusListener) {
+                        keyer.off("status", statusListener);
+                        statusListener = null;
+                    }
+
+                    await keyer.disconnect();
+                    keyer = null;
+                    stopEchoPolling();
+                    refreshEchoAscii();
+                    renderStatusTable({ isOpen: false });
+                    log("Disconnected", "success");
+                }
+                updateUI(false);
+            } catch (error) {
+                log(`Disconnect failed: ${error.message}`, "error");
+            }
+        }
+
+        async function initialize() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                log("Initializing keyer...");
+                await keyer.init();
+                log("Initialization complete", "success");
+            } catch (error) {
+                log(`Init failed: ${error.message}`, "error");
+            }
+        }
+
+        async function sendBreak() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                log("Sending break...");
+                await keyer.break();
+                log("Break sent", "success");
+            } catch (error) {
+                log(`Break failed: ${error.message}`, "error");
+            }
+        }
+
+        async function requestStatus() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                renderStatusTable(keyer.getStatus());
+                log("Status table refreshed from latest known status.", "info");
+            } catch (error) {
+                log(`Status request failed: ${error.message}`, "error");
+            }
+        }
+
+        async function setWpm() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                const wpm = parseInt(wpmInput.value, 10);
+                if (isNaN(wpm) || wpm < 5 || wpm > 99) {
+                    throw new Error("WPM must be between 5 and 99");
+                }
+                log(`Setting WPM to ${wpm}...`);
+                await keyer.setWpm(wpm);
+                log(`WPM set to ${wpm}`, "success");
+            } catch (error) {
+                log(`Set WPM failed: ${error.message}`, "error");
+            }
+        }
+
+        async function sendCw() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                const text = cwInput.value.trim();
+                if (!text) {
+                    throw new Error("Enter text to send");
+                }
+                log(`Sending CW: "${text}"...`);
+                await keyer.sendCw(text);
+                log(`CW sent: "${text}"`, "success");
+                cwInput.value = "";
+            } catch (error) {
+                log(`Send CW failed: ${error.message}`, "error");
+            }
+        }
+
+        function waitForEmitFalse(timeoutMs = 10000) {
+            return new Promise((resolve, reject) => {
+                if (keyer.getStatus().emit === false) {
+                    resolve();
+                    return;
+                }
+                const timer = setTimeout(() => {
+                    keyer.off("status", listener);
+                    reject(new Error("Timeout waiting for emit=false"));
+                }, timeoutMs);
+                function listener(status) {
+                    if (status.emit === false) {
+                        clearTimeout(timer);
+                        keyer.off("status", listener);
+                        resolve();
+                    }
+                }
+                keyer.on("status", listener);
+            });
+        }
+
+        async function cwTest() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                log("CW TEST: sending \"TEST\"...");
+                await keyer.sendCw("TEST");
+                log("CW TEST: waiting for emit=false...");
+                await waitForEmitFalse();
+                log("CW TEST: emit=false, sending \"TEST\" again...");
+                await keyer.sendCw("TEST");
+                log("CW TEST: done", "success");
+            } catch (error) {
+                log(`CW TEST failed: ${error.message}`, "error");
+            }
+        }
+
+        async function speedTest() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                log("Speed Test: setting WPM to 15...");
+                await keyer.setWpm(15);
+                log("Speed Test: sending \"TEST\" at 15 WPM...");
+                await keyer.sendCw("TEST");
+                log("Speed Test: waiting for emit=false...");
+                await waitForEmitFalse();
+                log("Speed Test: setting WPM to 25...");
+                await keyer.setWpm(25);
+                log("Speed Test: sending \"TEST\" at 25 WPM...");
+                await keyer.sendCw("TEST");
+                log("Speed Test: done", "success");
+            } catch (error) {
+                log(`Speed Test failed: ${error.message}`, "error");
+            }
+        }
+
+        async function sendRawCommand() {
+            try {
+                if (!keyer) throw new Error("Not connected");
+                const hexStr = rawCommandInput.value.trim();
+                if (!hexStr) {
+                    throw new Error("Enter hex bytes to send");
+                }
+
+                const bytes = [];
+                // Remove spaces first to handle both "00 02 0A" and "000A02" formats
+                const cleanedHex = hexStr.replace(/\s+/g, '');
+                
+                // Parse pairs of hex digits
+                if (cleanedHex.length % 2 !== 0) {
+                    throw new Error("Hex string must have even number of digits");
+                }
+                
+                for (let i = 0; i < cleanedHex.length; i += 2) {
+                    const byte = cleanedHex.substr(i, 2);
+                    if (!/^[0-9a-fA-F]{2}$/.test(byte)) {
+                        throw new Error(`Invalid hex byte: ${byte}`);
+                    }
+                    bytes.push(parseInt(byte, 16));
+                }
+
+                const data = new Uint8Array(bytes);
+                log(`Sending raw command: ${hexStr}`);
+                await keyer.sendBytes(data);
+                log(`Raw command sent`, "success");
+                rawCommandInput.value = "";
+            } catch (error) {
+                log(`Send raw command failed: ${error.message}`, "error");
+            }
+        }
+
+        const cwTestBtn = document.getElementById("cwTestBtn");
+
+        connectBtn.addEventListener("click", connectSerial);
+        disconnectBtn.addEventListener("click", disconnectSerial);
+        initBtn.addEventListener("click", initialize);
+        breakBtn.addEventListener("click", sendBreak);
+        statusBtn.addEventListener("click", requestStatus);
+        setWpmBtn.addEventListener("click", setWpm);
+        speedTestBtn.addEventListener("click", speedTest);
+        sendRawBtn.addEventListener("click", sendRawCommand);
+        // sendCwBtn.addEventListener("click", sendCw);
+        // cwTestBtn.addEventListener("click", cwTest);
+        cwInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendCw();
+            }
+        });
+
+        wpmInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                setWpm();
+            }
+        });
+
+        log("Demo ready. Web Serial API: " + (navigator.serial ? "✓" : "✗"));
+        updateUI(false);
+        refreshEchoAscii();
+        renderStatusTable({ isOpen: false });
+    </script>
+</body>
+
+</html>

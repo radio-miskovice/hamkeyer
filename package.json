@@ -1,0 +1,59 @@
+{
+  "name": "cwkeyer",
+  "version": "1.0.1",
+  "description": "CW Keyer over serial port interface for ham radio applications in browser",
+  "type": "module",
+  "main": "./build/index.js",
+  "module": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "import": "./browser/index.browser.js",
+        "types": "./browser/index.browser.d.ts"
+      },
+      "import": "./build/index.js",
+      "types": "./build/index.d.ts"
+    }
+  },
+  "files": [
+    "build",
+    "browser"
+  ],
+  "scripts": {
+    "clean": "rimraf build browser",
+    "build": "rimraf build && esbuild src/index.ts --bundle --outfile=build/index.js --platform=node --format=esm --external:serialport --sourcemap && tsc -p tsconfig.build.json",
+    "build:browser": "rimraf browser && esbuild src/index.browser.ts --bundle --outfile=browser/index.browser.js --platform=browser --format=esm --sourcemap && tsc -p tsconfig.browser.json",
+    "build:watch": "esbuild src/index.browser.ts --bundle --outfile=browser/index.browser.js --platform=browser --format=esm --sourcemap --watch",
+    "dev": "npm run build:browser && concurrently \"npm run build:watch\" \"vite\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "direct:admin": "tsx test/direct/admin.ts",
+    "direct:connect": "tsx test/direct/connect.ts",
+    "direct:close": "tsx test/direct/close.ts",
+    "direct:defaults": "tsx test/direct/defaults.ts",
+    "direct:long": "tsx test/direct/long.ts",
+    "direct:open": "tsx test/direct/open.ts",
+    "direct:sendtext": "tsx test/direct/sendtext.ts"
+  },
+  "keywords": [
+    "keyer",
+    "ham radio",
+    "cw",
+    "morse code",
+    "serial port",
+    "web serial api"
+  ],
+  "author": "Jindřich Vavruška <jindrich@vavruska.cz>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.6.2",
+    "esbuild": "^0.28.0",
+    "rimraf": "^6.0.1",
+    "serialport": "^12.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}
