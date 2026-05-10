@@ -36,6 +36,8 @@ This document covers the full public API of the `hamkeyer` library.
    - [createWebSerialSession()](#createwebserialsession)
    - [createNodeSerialSession()](#createnodeserialsession)
    - [Web Serial helpers](#web-serial-helpers)
+     - [connectSerialSession()](#connectserialsession)
+     - [autoConnectWebSerial()](#autoconnectwebserial)
 
 ---
 
@@ -145,13 +147,19 @@ port.once("open", async () => {
 
 #### `init(): Promise<void>`
 
-Initialises the keyer hardware. For Winkeyer this sends HOST OPEN, enables WK2 mode, configures the speed-pot range, and clears the transmit buffer. Must be called after `connectWithSession()` / `connect()` / `connectStandalone()` before sending CW.
+Initialises the keyer hardware. For Winkeyer this:
+1. Reads the 15-byte EEPROM defaults from the device (synchronises internal state — speed, mode, sidetone, weighting, dash-ratio — with the hardware's stored values).
+2. Sends HOST OPEN and waits for the firmware version byte.
+3. Enables WK2 (extended) mode.
+4. Clears the transmit buffer.
+
+Must be called after `connectWithSession()` / `connect()` / `connectStandalone()` before sending CW.
 
 ```typescript
 await keyer.init();
 ```
 
-Throws if the Winkeyer responds with `0xFF` which could mean that the keyer is actually commuicating at 9600 bps but the port is set to 1200 bps or if no version byte is received within 500 ms.
+Throws if the EEPROM read times out (5 s), if the Winkeyer responds to HOST OPEN with `0xFF` (baud-rate mismatch), or if no version byte is received within 500 ms.
 
 For other types of keyers (e.g. Spider Keyer) the error condition might differ.
 
@@ -638,3 +646,23 @@ Opens a `SerialPort` with the given options. Skips the open call if the port is 
 #### `closeSerialPort(port: SerialPort): Promise<void>`
 
 Closes a `SerialPort` if it is currently open.
+
+#### `connectSerialSession(serialOptions: SerialOptions, requestOptions?: SerialPortRequestOptions): Promise<SerialSession>`
+
+Combines `requestSerialPort()`, `openSerialPort()`, and `createWebSerialSession()` into a single call. Shows the browser port-picker dialog, opens the chosen port, and returns a ready-to-use `SerialSession`. Browser-only; throws if the Web Serial API is unavailable.
+
+```typescript
+const session = await connectSerialSession({ baudRate: 1200 });
+await keyer.connectWithSession(session);
+```
+
+#### `autoConnectWebSerial(serialOptions: SerialOptions): Promise<SerialSession | null>`
+
+Silently reconnects using the **first previously-granted** Web Serial port — no port-picker dialog is shown. Returns a ready `SerialSession`, or `null` if no port was previously granted or if the Web Serial API is unavailable. Useful for reconnecting on page reload.
+
+```typescript
+const session = await autoConnectWebSerial({ baudRate: 1200 });
+if (session) {
+    await keyer.connectWithSession(session);
+}
+```
