@@ -1,6 +1,6 @@
 {
   "name": "cwkeyer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CW Keyer over serial port interface for ham radio applications in browser",
   "type": "module",
   "main": "./build/index.js",
