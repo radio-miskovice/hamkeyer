@@ -306,7 +306,7 @@ Returns a snapshot of the current keyer status. See [KeyerStatus](#keyerstatus).
 
 Returns the accumulated ASCII echo buffer (characters sent back by the keyer during or after transmission).
 
-#### `on(eventName: "status" | "echo", listener): void`
+#### `on(eventName: "status" | "echo" | "wpm", listener): void`
 
 Subscribes to an event.
 
@@ -314,6 +314,7 @@ Subscribes to an event.
 |---|---|---|
 | `"status"` | `(status: KeyerStatus) => void` | Any status field changes |
 | `"echo"` | `(ascii: string) => void` | A single ASCII character is echoed back by the keyer |
+| `"wpm"` | `(wpm: number) => void` | The current keyer speed (words per minute) is reported via the dedicated speed event |
 
 Listeners are called asynchronously (via `queueMicrotask`).
 
@@ -323,9 +324,13 @@ keyer.on("status", (s) => {
 });
 
 keyer.on("echo", (ch) => process.stdout.write(ch));
+
+keyer.on("wpm", (wpm) => {
+    console.log("Speed update:", wpm, "WPM");
+});
 ```
 
-#### `off(eventName: "status" | "echo", listener): void`
+#### `off(eventName: "status" | "echo" | "wpm", listener): void`
 
 Removes a previously registered listener. The `listener` reference must be the same function passed to `on()`.
 

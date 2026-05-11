@@ -14,7 +14,6 @@
  *         npm run direct:long -- COM10 9600
  */
 
-import { stat } from "node:fs";
 import { KeyingMode } from "../../src/core";
 import type { KeyerStatus } from "../../src/core";
 import { NodeCWKeyer } from "../../src/core-node";
@@ -32,7 +31,7 @@ const EMIT_TIMEOUT_MS = 60_000;
 const keyer = NodeCWKeyer.create("winkeyer");
 
 keyer.on("status", (s: KeyerStatus) => {
-	console.log("Status:", s);
+	// console.log("Status:", s);
 });
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));

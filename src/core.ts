@@ -96,6 +96,10 @@ interface EchoListener {
 	(ascii: string): void;
 }
 
+interface WpmListener {
+	(wpm: number): void;
+}
+
 // ─── Protocol adapter factory ─────────────────────────────────────────────────
 
 function createProtocolAdapter(type: string, keyer: CWKeyer): ProtocolAdapter {
@@ -126,6 +130,7 @@ export class CWKeyer {
 	private status: KeyerStatus = {};
 	private statusListeners: Array<StatusListener> = [];
 	private echoListeners: Array<EchoListener> = [];
+	private wpmListeners: Array<WpmListener> = [];
 	private versionText: string | null = null;
 	private echoText = "";
 
@@ -266,15 +271,17 @@ export class CWKeyer {
 		return { ...this.status, keyerType: this.keyerType };
 	}
 
-	on(eventName: "status" | "echo", listener: StatusListener | EchoListener): void {
+	on(eventName: "status" | "echo" | "wpm", listener: StatusListener | EchoListener | WpmListener ): void {
 		if (eventName === "status") {
 			this.statusListeners.push(listener as StatusListener);
 		} else if (eventName === "echo") {
 			this.echoListeners.push(listener as EchoListener);
+		} else if (eventName === "wpm") {
+			this.wpmListeners.push(listener as WpmListener);
 		}
 	}
 
-	off(eventName: "status" | "echo", listener: StatusListener | EchoListener): void {
+	off(eventName: "status" | "echo" | "wpm", listener: StatusListener | EchoListener | WpmListener): void {
 		if (eventName === "status") {
 			const idx = this.statusListeners.indexOf(listener as StatusListener);
 			if (idx !== -1) {
@@ -284,6 +291,11 @@ export class CWKeyer {
 			const idx = this.echoListeners.indexOf(listener as EchoListener);
 			if (idx !== -1) {
 				this.echoListeners.splice(idx, 1);
+			}
+		} else if (eventName === "wpm") {
+			const idx = this.wpmListeners.indexOf(listener as WpmListener);
+			if (idx !== -1) {
+				this.wpmListeners.splice(idx, 1);
 			}
 		}
 	}

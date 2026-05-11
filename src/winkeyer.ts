@@ -293,6 +293,7 @@ export class WinkeyerProtocolAdapter implements ProtocolAdapter {
       }
       // Status byte
       if ((b & 0xe8) === 0xc0) {
+        console.log(`STATUS 0b${b.toString(2).padStart(8, "0")} = 0x${b.toString(16).padStart(2, "0")}`);
         this.status.busy = !!(b & 0x10);
         this.status.emit = !!(b & 0x04);
         this.status.full = !!(b & 0x01);
