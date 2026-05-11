@@ -45,7 +45,11 @@
     "serial port",
     "web serial api"
   ],
-  "author": "Jindřich Vavruška <jindrich@vavruska.cz>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/radio-miskovice/hamkeyer.git"
+  },
+  "author": "Jindřich Vavruška <radio.miskovice@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^25.6.2",
