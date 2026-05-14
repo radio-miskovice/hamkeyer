@@ -1,11 +1,23 @@
+/* Copyright 2026 Jindřich Vavruška jindrich@vavruska.cz 
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee 
+is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED “AS IS” AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE 
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE 
+FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS 
+OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, 
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 /**
- * Winkeyer 3.1 Protocol Implementation
+ * Winkeyer 2.3 Protocol Implementation
  *
- * Full implementation of the Winkeyer 3.1 host mode protocol for controlling
+ * Full implementation of the Winkeyer 2.3 host mode protocol for controlling
  * morse code keyers via serial port. Includes command builders, status parsing,
  * and serial transport wrapper.
  *
- * Reference: Winkeyer 3.1 Host Mode Protocol
+ * Reference: Winkeyer 2.3 Host Mode Protocol
  */
 
 import type { KeyerMode, KeyerStatus, KeyingMode, ProtocolAdapter } from "./index";
