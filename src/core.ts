@@ -46,6 +46,8 @@ export interface KeyerMode {
 	keyingMode?: KeyingMode;
 }
 
+export type KeyerFunctionName = string;
+
 // ─── ProtocolAdapter interface ────────────────────────────────────────────────
 
 /**
@@ -71,6 +73,7 @@ export interface ProtocolAdapter {
 	init(): Promise<void>;
 	break(): Promise<void>;
 	sendCw(text: string): Promise<void>;
+	set(name: KeyerFunctionName, value: Record<string, any> | string): Promise<void>;
 	setWpm(wpm: number): Promise<void>;
 	setSidetoneFrequency(freq: number): Promise<void>;
 	setWeighting(weighting: number): Promise<void>;
@@ -358,5 +361,23 @@ export class CWKeyer {
         this.assertConnected();
         return this.protocolAdapter!.setExtendedOptions(options);
     }
+
+	/**
+	 * Universal method to pass through any keyer-specific function that is not covered by the standard CWKeyer interface. 
+	 * The specific functions and their parameters depend on the protocol adapter and underlying keyer 
+	 * capabilities. This allows to support advanced features of specific keyers without bloating 
+	 * the standard interface with rarely used methods. 
+	 * 
+	 * The method name and parameters are passed as a simple key-value pair, or a single string for simple 
+	 * functions, and the protocol adapter can choose to implement or ignore it based on its capabilities.
+	 * @param name Function name. If the underlying protocol adapter does not recognize it,
+	 *   the returned Promise rejects.
+	 * @param value parameters for the function. The meaning depends on the specific function and protocol adapter.
+	 * @returns 
+	 */
+	set(name: KeyerFunctionName, value: Record<string, any> | string): Promise<void> {
+		this.assertConnected();
+		return this.protocolAdapter!.set(name, value);
+	}
 
 }

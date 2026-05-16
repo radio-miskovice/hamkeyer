@@ -330,6 +330,7 @@
                         <button id="sendRawBtn" disabled>Send Raw</button>
                     </div>
                 </div>
+
             </div>
 
             <div class="section status-panel">
@@ -393,7 +394,7 @@
     </div>
 
 
-    <script src="./build/bundle.js"></script>
+    <script type="module" src="./browser/index.browser.js"></script>
     <script>
         let keyer = null;
         const output = document.getElementById("output");
@@ -521,7 +522,7 @@
 
                 const api = window.Hamkeyer;
                 if (!api) {
-                    throw new Error("Bundle not loaded. Run npm run build.");
+                    throw new Error("Bundle not loaded. Run npm run build:browser.");
                 }
 
                 if (!window.isSecureContext) {
@@ -532,8 +533,8 @@
                     throw new Error("Web Serial not supported by this browser");
                 }
 
-                keyer = await api.Keyer.create("winkeyer");
-                await keyer.connect("", 1200);
+                keyer = api.CWKeyer.create("winkeyer");
+                await keyer.connect(1200);
 
                 statusListener = (status) => {
                     renderStatusTable(status);

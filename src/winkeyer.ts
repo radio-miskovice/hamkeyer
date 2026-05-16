@@ -20,7 +20,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * Reference: Winkeyer 2.3 Host Mode Protocol
  */
 
-import type { KeyerMode, KeyerStatus, KeyingMode, ProtocolAdapter } from "./index";
+import type { KeyerFunctionName, KeyerMode, KeyerStatus, KeyingMode, ProtocolAdapter } from "./index";
 
 /**
  * Command codes sent from host to Winkeyer device
@@ -164,6 +164,11 @@ export class WinkeyerProtocolAdapter implements ProtocolAdapter {
 
   constructor(private readonly hooks: WinkeyerAdapterHooks) { }
 
+  set(name: KeyerFunctionName, value: Record<string, any> | string): Promise<void> {
+    void value;
+    return Promise.reject(new Error(`Unsupported function: ${name}`));
+  }
+
   /**
    * @param weighting 1 = weighting 1:1, >1 is more key down time, <1 means more space time
    * It is converted to winkeyer parameter, clamped and applied
@@ -218,10 +223,9 @@ export class WinkeyerProtocolAdapter implements ProtocolAdapter {
    * @returns Promise resolving after data had been transferred to the keyer serial port
    */
   setExtendedOptions(options: Record<string, any>): Promise<void> {
-    // throw new Error("Method not implemented.");
-    this.keyingMode = { ...this.keyingMode, ...options} as WinkeyerMode; // merge with existing mode, so that we can set multiple parameters independently without overwriting others. Winkeyer mode is a bitfield, so we need to combine all the parameters into a single byte.
+    this.keyingMode = { ...this.keyingMode, ...(options as WinkeyerMode) } as WinkeyerMode; // merge with existing mode, so that we can set multiple parameters independently without overwriting others. Winkeyer mode is a bitfield, so we need to combine all the parameters into a single byte.
     let wkMode = this.getKeyingModeByte();
-    return this.hooks.sendBytes(new Uint8Array([WinkeyerCommand.SET_MODE, wkMode]));  
+    return this.hooks.sendBytes(new Uint8Array([WinkeyerCommand.SET_MODE, wkMode]));
   }
 
   getWpm(): number | undefined {

@@ -287,6 +287,16 @@ Sets adapter-specific options not covered by the standard `KeyerMode` interface.
 await keyer.setExtendedOptions({ paddleSwap: true, autospace: true });
 ```
 
+#### `set(name: string, value: Record<string, any> | string): Promise<void>`
+
+Passes keyer-specific function calls to the active protocol adapter.
+
+```typescript
+await keyer.set("someFutureFunction", "value");
+```
+
+For the current Winkeyer adapter, no extra `set()` functions are implemented; calling `set()` rejects with an `Unsupported function` error.
+
 ---
 
 ### Reflection
@@ -471,6 +481,7 @@ Implements `ProtocolAdapter`. Constructed with an `WinkeyerAdapterHooks` object 
 | `setDashRatio(ratio: number)` | Sets the dit:dah ratio. Normal value is `3.0` (3:1). Converted to Winkeyer range 33–66. |
 | `setSidetoneFrequency(freq: number)` | Sets sidetone frequency in Hz. Converted to Winkeyer divisor (4000 / freq), clamped to 1–10. |
 | `setExtendedOptions(options: WinkeyerMode)` | Sets Winkeyer-specific mode bits (see [WinkeyerMode](#winkeyermode)) merged into the current mode. |
+| `set(name: string, value: Record<string, any> | string)` | Generic pass-through function entry point. In the current Winkeyer adapter this always rejects with `Unsupported function`. |
 | `getWpm()` | Returns the WPM from the last received hardware status byte, or `undefined`. |
 | `getWeighting()` | Returns the current weighting (default `1.0`). |
 | `getKeyerMode()` | Returns a shallow copy of the current keyer mode state. |
